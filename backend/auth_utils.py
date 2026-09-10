@@ -11,7 +11,7 @@ from psycopg.rows import dict_row
 ph = PasswordHasher()
 security = HTTPBearer()
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-default-key-for-dev")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 1 day
 

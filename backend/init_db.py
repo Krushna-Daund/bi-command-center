@@ -13,7 +13,7 @@ def init_db():
         port=os.getenv("DATABASE_PORT", "5432"),
         dbname=os.getenv("DATABASE_NAME", "bi_command_center"),
         user=os.getenv("DATABASE_USER", "postgres"),
-        password=os.getenv("DATABASE_PASSWORD", "2466")
+        password=os.getenv("DATABASE_PASSWORD")
     )
     
     with conn.cursor() as cur:
@@ -82,12 +82,17 @@ def init_db():
         cur.execute("SELECT id FROM users WHERE email = 'admin@example.com'")
         if cur.fetchone() is None:
             # Create a default admin user
-            password_hash = ph.hash("admin123")
+            admin_password = os.getenv("ADMIN_INITIAL_PASSWORD")
+            if not admin_password:
+                raise RuntimeError("ADMIN_INITIAL_PASSWORD must be set when initializing the database")
+
+
+            password_hash = ph.hash(admin_password)
             cur.execute("""
                 INSERT INTO users (name, email, password_hash, role)
                 VALUES (%s, %s, %s, %s)
             """, ("Admin User", "admin@example.com", password_hash, "ADMIN"))
-            print("Default admin user created: admin@example.com / admin123")
+            print("Default admin user created: admin@example.com")
         
         conn.commit()
     

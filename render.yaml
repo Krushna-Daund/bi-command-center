@@ -1,7 +1,19 @@
+databases:
+  - name: bi-command-center-db
+    databaseName: bi_command_center
+    user: bi_user
+    plan: free
+
 services:
+  - type: keyvalue
+    name: bi-command-center-redis
+    plan: free
+    ipAllowList: []
+
   - type: web
     name: bi-command-center-api
     runtime: python
+    plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
@@ -9,24 +21,38 @@ services:
     autoDeploy: true
     envVars:
       - key: DATABASE_HOST
-        sync: false
+        fromDatabase:
+          name: bi-command-center-db
+          property: host
       - key: DATABASE_PORT
-        sync: false
+        fromDatabase:
+          name: bi-command-center-db
+          property: port
       - key: DATABASE_NAME
-        sync: false
+        fromDatabase:
+          name: bi-command-center-db
+          property: database
       - key: DATABASE_USER
-        sync: false
+        fromDatabase:
+          name: bi-command-center-db
+          property: user
       - key: DATABASE_PASSWORD
-        sync: false
+        fromDatabase:
+          name: bi-command-center-db
+          property: password
       - key: JWT_SECRET_KEY
         sync: false
       - key: REDIS_URL
-        sync: false
+        fromService:
+          type: keyvalue
+          name: bi-command-center-redis
+          property: connectionString
       - key: CORS_ORIGINS
         sync: false
 
-  - type: static
+  - type: web
     name: bi-command-center-frontend
+    runtime: static
     rootDir: frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: dist

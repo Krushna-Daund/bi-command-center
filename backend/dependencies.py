@@ -13,7 +13,7 @@ def get_db():
         port=os.getenv("DATABASE_PORT", "5432"),
         dbname=os.getenv("DATABASE_NAME", "bi_command_center"),
         user=os.getenv("DATABASE_USER", "postgres"),
-        password=os.getenv("DATABASE_PASSWORD", "2466"),
+        password=os.getenv("DATABASE_PASSWORD"),
         row_factory=dict_row
     )
     try:
