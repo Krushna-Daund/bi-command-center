@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi_cache.decorator import cache
 from psycopg import Connection
-from psycopg.rows import dict_row
 from dependencies import get_db, GlobalFilterParams
 from queries.filters import build_filtered_orders_cte
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: `${import.meta.env.VITE_API_URL || '/api'}`,
 });
 
 api.interceptors.request.use((config) => {
@@ -29,7 +29,7 @@ api.interceptors.response.use(
 // A utility to clean up empty filters before sending
 export const getFilteredData = async (endpoint, filters) => {
   const cleanFilters = Object.fromEntries(
-    Object.entries(filters).filter(([_, v]) => v != null && v !== '')
+    Object.entries(filters).filter(([, v]) => v != null && v !== '')
   );
   
   const response = await api.get(endpoint, { params: cleanFilters });

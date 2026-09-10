@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, Bot, User, Loader2 } from 'lucide-react';
+import api from '../api';
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,21 +28,9 @@ export default function ChatWidget() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: userMessage.text })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch response');
-      }
-      
-      const aiResponse = await response.json();
-      setMessages(prev => [...prev, aiResponse]);
-    } catch (error) {
+      const { data } = await api.post('/chat', { message: userMessage.text });
+      setMessages(prev => [...prev, data]);
+    } catch {
       setMessages(prev => [...prev, { role: 'ai', text: 'Sorry, I encountered an error. Please try again later.' }]);
     } finally {
       setIsLoading(false);
