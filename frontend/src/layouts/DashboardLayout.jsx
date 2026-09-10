@@ -1,22 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   TrendingUp, 
-  ShoppingCart, 
   Users, 
   Package, 
-  Store, 
-  Map as MapIcon, 
   Truck, 
-  Star, 
-  CreditCard,
   Menu,
   Moon,
   Sun,
-  LineChart,
-  GitCompare,
-  BarChart2
 } from 'lucide-react';
 import FilterBar from '../components/FilterBar';
 import NotificationBell from '../components/Notifications/NotificationBell';

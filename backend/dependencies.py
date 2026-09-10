@@ -1,6 +1,6 @@
 import os
-from typing import Optional, List, Any
-from fastapi import Query, Depends
+from typing import Optional
+from fastapi import Query
 import psycopg
 from psycopg.rows import dict_row
 from dotenv import load_dotenv

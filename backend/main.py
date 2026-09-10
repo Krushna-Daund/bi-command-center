@@ -1,4 +1,6 @@
 from contextlib import asynccontextmanager
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import get_connection
@@ -9,16 +11,27 @@ from redis import asyncio as aioredis
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    redis = aioredis.from_url("redis://localhost:6380", encoding="utf-8", decode_responses=True)
+    redis_url = os.getenv("REDIS_URL", "redis://localhost:6380")
+    redis = aioredis.from_url(redis_url, encoding="utf-8", decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
-    yield
+    try:
+        yield
+    finally:
+        await redis.close()
 
 app = FastAPI(title="BI Command Center API", lifespan=lifespan)
 
 # Setup CORS for Vite dev server
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        origin.strip()
+        for origin in os.getenv(
+            "CORS_ORIGINS",
+            "http://localhost:5173,http://127.0.0.1:5173",
+        ).split(",")
+        if origin.strip()
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
