@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+.env.*
+
+# Node
+node_modules/
+dist/
+
+# VS Code
+.vscode/
+
+# Data files
+data/*.zip
+data/olist/*.csv
+
+# Temporary files
+temp.json
+
+# Logs
+*.log

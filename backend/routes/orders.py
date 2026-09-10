@@ -1,0 +1,89 @@
+from fastapi import APIRouter, Depends, Request
+from fastapi_cache.decorator import cache
+from psycopg import Connection
+from dependencies import get_db, GlobalFilterParams
+from queries.filters import build_filtered_orders_cte
+
+router = APIRouter(prefix="/api/orders", tags=["orders"])
+
+@router.get("/status")
+@cache(expire=300)
+def get_order_status_distribution(
+    request: Request,
+    filters: GlobalFilterParams = Depends(),
+    db: Connection = Depends(get_db)
+):
+    cte_sql, params = build_filtered_orders_cte(filters)
+    
+    query = f"""
+        {cte_sql}
+        SELECT 
+            o.order_status,
+            COUNT(DISTINCT fo.order_id) as count
+        FROM filtered_orders fo
+        JOIN analytics.fact_order o ON fo.order_key = o.order_key
+        GROUP BY o.order_status
+        ORDER BY count DESC
+    """
+    
+    with db.cursor() as cur:
+        cur.execute(query, params)
+        results = cur.fetchall()
+        
+    return results
+
+@router.get("/trend")
+@cache(expire=300)
+def get_order_trend(
+    request: Request,
+    filters: GlobalFilterParams = Depends(),
+    db: Connection = Depends(get_db)
+):
+    cte_sql, params = build_filtered_orders_cte(filters)
+    
+    query = f"""
+        {cte_sql}
+        SELECT 
+            d.year,
+            d.month,
+            MAX(d.month_name) as month_name,
+            COUNT(DISTINCT fo.order_id) as total_orders
+        FROM filtered_orders fo
+        JOIN analytics.fact_order o ON fo.order_key = o.order_key
+        JOIN analytics.dim_date d ON o.order_date_key = d.date_key
+        GROUP BY d.year, d.month
+        ORDER BY d.year, d.month
+    """
+    
+    with db.cursor() as cur:
+        cur.execute(query, params)
+        results = cur.fetchall()
+        
+    return results
+
+@router.get("/state")
+@cache(expire=300)
+def get_orders_by_state(
+    request: Request,
+    filters: GlobalFilterParams = Depends(),
+    db: Connection = Depends(get_db)
+):
+    cte_sql, params = build_filtered_orders_cte(filters)
+    
+    query = f"""
+        {cte_sql}
+        SELECT 
+            c.state,
+            COUNT(DISTINCT fo.order_id) as total_orders
+        FROM filtered_orders fo
+        JOIN analytics.fact_order o ON fo.order_key = o.order_key
+        JOIN analytics.dim_customer c ON o.customer_key = c.customer_key
+        GROUP BY c.state
+        ORDER BY total_orders DESC
+    """
+    
+    with db.cursor() as cur:
+        cur.execute(query, params)
+        results = cur.fetchall()
+        
+    return results
